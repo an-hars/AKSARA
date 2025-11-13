@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 18
+names: ['BA', 'CA', 'DA', 'GA', 'HA', 'JA', 'KA', 'LA', 'MA', 'NA', 'NGA', 'NYA', 'PA', 'RA', 'SA', 'TA', 'WA', 'YA']
+
+roboflow:
+  workspace: deteksi-aksara-sasak
+  project: deteksi-aksara-sasak-il9rv
+  version: 5
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/deteksi-aksara-sasak/deteksi-aksara-sasak-il9rv/dataset/5

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Aksara Sasak | Pro</title>
+    <!-- 1. MEMUAT TAILWIND CSS -->
+    <!-- Ini adalah framework yang membuat tampilan jadi modern -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* CSS Tambahan Kecil */
+        /* Menyembunyikan scrollbar di video (opsional) */
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+        video::-webkit-media-controls-enclosure {
+            display: none !important;
+        }
+        /* Style untuk tombol nav aktif */
+        .nav-btn.active {
+            background-color: #ffffff;
+            color: #3b82f6; /* text-blue-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- 1. HEADER & NAVIGASI (Terinspirasi "Tutorgo") -->
+    <header class="bg-gray-900 text-white shadow-lg sticky top-0 z-50">
+        <nav class="container mx-auto max-w-6xl px-4 py-4 flex justify-between items-center">
+            <!-- Logo/Judul -->
+            <a href="#" class="text-2xl font-bold text-blue-400">
+                AksaraOCR
+            </a>
+            
+            <!-- Menu Navigasi -->
+            <div class="flex items-center space-x-4">
+                <button id="nav-home-btn" class="nav-btn px-4 py-2 rounded-lg font-medium transition-colors duration-300 hover:bg-blue-600">Home</button>
+                <button id="nav-deskripsi-btn" class="nav-btn px-4 py-2 rounded-lg font-medium transition-colors duration-300 hover:bg-blue-600">Deskripsi</button>
+                <a href="#" class="bg-blue-500 px-4 py-2 rounded-lg font-semibold shadow-md transition-transform duration-300 hover:scale-105">
+                    Hubungi Kami
+                </a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 2. KONTEN UTAMA (MAIN) -->
+    <main class="container mx-auto max-w-6xl mt-8 px-4">
+        
+        <!-- Halaman HOME (Aplikasi OCR) -->
+        <!-- Ini adalah "Hero Section" kita, mirip "Tutorgo" -->
+        <div id="home-container" class="page-container bg-gradient-to-br from-gray-900 to-blue-900 text-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 items-center gap-8 p-8 md:p-12">
+                
+                <!-- Kolom Kiri: Teks (Seperti "Tutorgo") -->
+                <div class="space-y-6">
+                    <span class="inline-block bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase">Didukung oleh ANHAR</span>
+                    <h1 class="text-4xl md:text-5xl font-extrabold leading-tight">
+                        Deteksi Aksara Sasak <br>Secara Real-time
+                    </h1>
+                    <p class="text-lg text-gray-300">
+                        Gunakan model CRNN kami untuk menerjemahkan Aksara Sasak langsung dari kamera Anda atau unggah gambar.
+                    </p>
+                    
+                    <!-- 1. KONTAINER PILIHAN -->
+                    <div id="choice-container" class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button id="start-cam-btn" class="choice-btn w-full sm:w-auto bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-blue-600">
+                            Gunakan Kamera
+                        </button>
+                        <button id="upload-btn" class="choice-btn w-full sm:w-auto bg-gray-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg transition-transform duration-300 hover:scale-105 hover:bg-gray-600">
+                            Upload Gambar
+                        </button>
+                        <input type="file" id="file-input" accept="image/*" class="hidden">
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan: Aplikasi (Pengganti gambar orang di "Tutorgo") -->
+                <div class="space-y-4">
+                    <!-- 2. KONTAINER KAMERA LIVE -->
+                <div id="live-container" class="hidden">
+                    <div id="webcam-container" class="relative w-full aspect-video rounded-xl shadow-xl overflow-hidden border-4 border-blue-500">
+                        <video id="webcam" autoplay playsinline class="w-full h-full object-cover"></video>
+                        
+                        <!-- TAMBAHKAN BARIS INI TEPAT DI BAWAH VIDEO -->
+                        <canvas id="canvas" class="hidden"></canvas>
+                        
+                    </div>
+                </div>
+                    
+                    <!-- 3. KONTAINER PREVIEW UPLOAD -->
+                    <div id="upload-container" class="hidden">
+                        <img id="image-preview" alt="Preview Gambar" class="w-full h-auto rounded-xl shadow-xl border-4 border-blue-500">
+                    </div>
+
+                    <!-- 4. KONTAINER HASIL (Umum) -->
+                    <div id="result-container" class="hidden bg-white/10 backdrop-blur-md rounded-xl p-6">
+                        <div id="result-label" class="text-sm font-medium text-gray-300 uppercase">Hasil Prediksi:</div>
+                        <div id="result" class="text-3xl font-bold text-blue-300 min-h-[50px] word-wrap break-word text-center py-2">...</div>
+                    </div>
+
+                    <!-- 5. STATUS (Umum) -->
+                    <div id="status" class="text-center text-gray-400">Pilih salah satu opsi di atas.</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Halaman DESKRIPSI (Konten Baru) -->
+        <!-- Ini meniru bagian "Popular Topic" di "Tutorgo" -->
+        <div id="deskripsi-container" class="page-container bg-white p-8 md:p-12 rounded-2xl shadow-xl">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-2">Tentang Proyek Ini</h2>
+            <p class="text-center text-gray-600 mb-10 max-w-2xl mx-auto">
+                Aplikasi ini adalah implementasi dari model OCR yang dilatih khusus untuk mengenali Aksara Sasak menggunakan arsitektur AI modern.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Kartu 1: CNN -->
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-xl hover:shadow-lg transition-shadow duration-300">
+                    <div class="w-12 h-12 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-4">
+                        <!-- Ikon SVG sederhana: Mata (Vision) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">CNN (Mata)</h3>
+                    <p class="text-gray-600">
+                        Bagian "mata" dari model (Convolutional Neural Network) yang bertugas mengekstrak fitur visual dari gambar.
+                    </p>
+                </div>
+                
+                <!-- Kartu 2: RNN -->
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-xl hover:shadow-lg transition-shadow duration-300">
+                    <div class="w-12 h-12 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-4">
+                        <!-- Ikon SVG sederhana: Otak (Logic) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" opacity="0.4" transform="translate(-2 -2)"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17l-2-2 4-4 4 4-2 2" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">RNN (Otak)</h3>
+                    <p class="text-gray-600">
+                        Bagian "otak" (Recurrent Neural Network) yang membaca urutan fitur dari CNN secara sekuensial.
+                    </p>
+                </div>
+                
+                <!-- Kartu 3: CTC -->
+                <div class="bg-blue-50 border border-blue-200 p-6 rounded-xl hover:shadow-lg transition-shadow duration-300">
+                    <div class="w-12 h-12 bg-blue-500 text-white rounded-lg flex items-center justify-center mb-4">
+                        <!-- Ikon SVG sederhana: Kalkulator (Perhitungan) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M12 17h.01M12 14h.01M15 17h.01M12 11h.01M9 14h.01M4 7h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">CTC Loss (Kalkulasi)</h3>
+                    <p class="text-gray-600">
+                        Fungsi perhitungan canggih yang memungkinkan model belajar dari gambar tanpa perlu pelabelan karakter per karakter.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 3. FOOTER -->
+    <footer class="bg-gray-900 text-gray-400 mt-16">
+        <div class="container mx-auto max-w-6xl px-4 py-8 text-center">
+            <p>&copy; 2025 - Proyek OCR Aksara Sasak. Dibuat dengan Flask, TensorFlow & Tailwind CSS.</p>
+        </div>
+    </footer>
+
+    <!-- 
+    ====================================================================
+    BAGIAN JAVASCRIPT (LOGIKA APLIKASI)
+    Tidak ada yang diubah di sini, hanya memindahkan posisinya.
+    Semua fungsionalitas tetap sama.
+    ====================================================================
+    -->
+    <script>
+        // --- 1. Ambil semua elemen HTML ---
+        const videoElement = document.getElementById('webcam');
+        const canvasElement = document.getElementById('canvas');
+        const canvasContext = canvasElement.getContext('2d');
+        const resultElement = document.getElementById('result');
+        const statusElement = document.getElementById('status');
+        
+        const choiceContainer = document.getElementById('choice-container');
+        const startCamBtn = document.getElementById('start-cam-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        
+        const liveContainer = document.getElementById('live-container');
+        const uploadContainer = document.getElementById('upload-container');
+        const imagePreview = document.getElementById('image-preview');
+        const resultContainer = document.getElementById('result-container');
+
+        // Elemen Navigasi
+        const navHomeBtn = document.getElementById('nav-home-btn');
+        const navDeskripsiBtn = document.getElementById('nav-deskripsi-btn');
+        const homeContainer = document.getElementById('home-container');
+        const deskripsiContainer = document.getElementById('deskripsi-container');
+
+        // --- 2. Tentukan Alamat API Backend Anda ---
+        const API_URL = 'http://127.0.0.1:5000/predict';
+        
+        let predictionInterval = null; // Variabel untuk menyimpan interval loop
+
+        // --- 3. LOGIKA NAVIGASI Halaman ---
+
+        function showHome() {
+            homeContainer.style.display = 'block'; // Tampilkan home (block, bukan flex)
+            deskripsiContainer.style.display = 'none'; // Sembunyikan deskripsi
+            
+            navHomeBtn.classList.add('active'); // Update tombol nav
+            navDeskripsiBtn.classList.remove('active');
+            
+            // Reset tampilan home ke pilihan awal
+            resetHomeView();
+        }
+
+        function showDeskripsi() {
+            homeContainer.style.display = 'none'; // Sembunyikan home
+            deskripsiContainer.style.display = 'block'; // Tampilkan deskripsi
+            
+            navHomeBtn.classList.remove('active'); // Update tombol nav
+            navDeskripsiBtn.classList.add('active');
+            
+            // PENTING: Matikan kamera jika sedang berjalan
+            stopCameraAndReset();
+        }
+
+        function stopCameraAndReset() {
+            if (predictionInterval) {
+                clearInterval(predictionInterval);
+                predictionInterval = null;
+            }
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+        }
+        
+        function resetHomeView() {
+            stopCameraAndReset();
+            
+            // Kembalikan UI ke status awal
+            liveContainer.style.display = 'none';
+            uploadContainer.style.display = 'none';
+            resultContainer.style.display = 'none';
+            choiceContainer.style.display = 'flex'; // Tampilkan pilihan
+            statusElement.innerText = 'Pilih salah satu opsi di atas.';
+            resultElement.innerText = '...';
+        }
+
+        // Atur event listener untuk tombol navigasi
+        navHomeBtn.addEventListener('click', showHome);
+        navDeskripsiBtn.addEventListener('click', showDeskripsi);
+
+        // --- 4. LOGIKA APLIKASI ---
+
+        startCamBtn.addEventListener('click', () => {
+            choiceContainer.style.display = 'none';
+            liveContainer.style.display = 'block';
+            resultContainer.style.display = 'block';
+            statusElement.innerText = "Menghubungkan ke kamera...";
+            startCamera();
+        });
+
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            choiceContainer.style.display = 'none';
+            liveContainer.style.display = 'none'; // Sembunyikan kamera jika aktif
+            uploadContainer.style.display = 'block';
+            resultContainer.style.display = 'block';
+            
+            handleFileUpload(file);
+        });
+
+        // --- 5. Fungsi untuk Opsi Kamera ---
+
+        async function startCamera() {
+            let constraints = { video: { width: 640, height: 480, facingMode: 'environment' }, audio: false };
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                videoElement.style.transform = 'scaleX(1)'; // Kamera belakang JANGAN di-mirror
+            } catch (err) {
+                console.warn("Kamera 'environment' gagal, mencoba 'user'", err);
+                statusElement.innerText = "Kamera belakang gagal, mencoba kamera depan...";
+                constraints = { video: { width: 640, height: 480, facingMode: 'user' }, audio: false };
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    videoElement.srcObject = stream;
+                    videoElement.style.transform = 'scaleX(-1)'; // Kamera depan di-mirror
+                } catch (userErr) {
+                    console.error("Error! Tidak bisa mengakses kamera:", userErr);
+                    statusElement.innerText = "Error: Gagal mengakses kamera.";
+                    return;
+                }
+            }
+            
+            videoElement.onloadedmetadata = () => {
+                videoElement.play();
+                statusElement.innerText = "Kamera Aktif. Siap memindai...";
+                if (predictionInterval) clearInterval(predictionInterval);
+                predictionInterval = setInterval(predictFrame, 1500);
+            };
+        }
+
+        function predictFrame() {
+            if (!videoElement.srcObject || videoElement.paused) return; 
+
+            // Sesuaikan ukuran canvas dengan video
+            canvasElement.width = videoElement.videoWidth;
+            canvasElement.height = videoElement.videoHeight;
+
+            canvasContext.save();
+            if (videoElement.style.transform === 'scaleX(-1)') {
+                canvasContext.scale(-1, 1);
+                canvasContext.drawImage(videoElement, -canvasElement.width, 0, canvasElement.width, canvasElement.height);
+            } else {
+                canvasContext.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+            }
+            canvasContext.restore();
+
+            const imageData_b64 = canvasElement.toDataURL('image/jpeg', 0.7);
+            sendPrediction(imageData_b64);
+        }
+
+        // --- 6. Fungsi untuk Opsi Upload File ---
+
+        function handleFileUpload(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const base60String = e.target.result;
+                imagePreview.src = base60String;
+                statusElement.innerText = "Mengirim gambar ke server...";
+                resultElement.innerText = "...";
+                sendPrediction(base60String);
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // --- 7. Fungsi PENGIRIMAN DATA (Umum) ---
+
+        async function sendPrediction(base64String) {
+            if (!base64String) {
+                console.error("Error: base64String kosong.");
+                return;
+            }
+            
+            if (statusElement.innerText.indexOf("Error") === -1) {
+                statusElement.innerText = "Memproses di server...";
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64String })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server merespon: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (data.prediction || data.prediction === "") {
+                    resultElement.innerText = data.prediction || '---';
+                    statusElement.innerText = "Prediksi selesai.";
+                } else if (data.error) {
+                    throw new Error(data.error);
+                }
+
+            } catch (error) {
+                console.error("Error saat prediksi:", error);
+                statusElement.innerText = `Error: Gagal terhubung/prediksi. (${error.message})`;
+            }
+        }
+        
+        // --- Inisialisasi Halaman ---
+        showHome(); // Selalu mulai dari halaman "Home"
+
+    </script>
+</body>
+</html>
